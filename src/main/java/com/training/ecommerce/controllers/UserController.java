@@ -29,4 +29,16 @@ public class UserController {
         return new ResponseEntity<>(ret, HttpStatus.FOUND);
     }
 
+    @PutMapping("/modifyUser")
+    public ResponseEntity<User> modifyUser(@RequestParam String email, @RequestBody User user){
+        User ret = userService.modifyUser(email, user);
+        return new ResponseEntity<>(ret, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/deleteUser")
+    public ResponseEntity<User> modifyUser(@RequestParam String email){
+        userService.deleteUser(email);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
 }
