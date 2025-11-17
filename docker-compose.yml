@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  mariadb:
+    image: mariadb:latest
+    container_name: training-ecommerce-db
+    restart: unless-stopped
+    environment:
+      MARIADB_ROOT_PASSWORD: root
+      MARIADB_DATABASE: training-ecommerce
+      MARIADB_USER: appUser
+      MARIADB_PASSWORD: appPass
+    ports:
+      - "3306:3306"
+    volumes:
+      - mariadb_data:/var/lib/mysql
+
+  app:
+    build:
+      context: ..
+      dockerfile: Dockerfile.dev
+    container_name: springboot-training-ecommerce
+    restart: always
+    depends_on:
+      - mariadb
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mariadb://mariadb:3306/training-ecommerce
+      SPRING_DATASOURCE_USERNAME: appUser
+      SPRING_DATASOURCE_PASSWORD: appPass
+    networks:
+      - springboot-network
+
+networks:
+  springboot-network:
+
+volumes:
+  mariadb_data:

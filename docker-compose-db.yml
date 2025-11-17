@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  mariadb:
+    image: mariadb:latest
+    container_name: training-ecommerce-db
+    restart: unless-stopped
+    environment:
+      MARIADB_ROOT_PASSWORD: root
+      MARIADB_DATABASE: training-ecommerce
+      MARIADB_USER: appUser
+      MARIADB_PASSWORD: appPass
+    ports:
+      - "3307:3306"  # mappa la porta 3306 del container alla 3307 locale
+    volumes:
+      - mariadb_data:/var/lib/mysql
+
+volumes:
+  mariadb_data:
