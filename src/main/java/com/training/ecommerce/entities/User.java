@@ -31,4 +31,7 @@ public class User{
     @OneToOne
     @JoinColumn(name = "cart_id")
     private Cart cart;
+
+    @OneToMany(mappedBy = "user")
+    private List<PurchasedItem> purchasedItemList;
 }

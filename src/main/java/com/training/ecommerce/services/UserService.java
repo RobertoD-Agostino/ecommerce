@@ -1,9 +1,11 @@
 package com.training.ecommerce.services;
 
 import com.training.ecommerce.dtos.UserDto;
+import com.training.ecommerce.entities.Cart;
 import com.training.ecommerce.entities.User;
 import com.training.ecommerce.exceptions.UserAlreadyExistsException;
 import com.training.ecommerce.exceptions.UserDoesNotExistsException;
+import com.training.ecommerce.repositories.CartRepository;
 import com.training.ecommerce.repositories.UserRepository;
 import com.training.ecommerce.utils.UserUtils;
 import lombok.RequiredArgsConstructor;
@@ -17,11 +19,15 @@ public class UserService {
 
     private final UserRepository userRepo;
     private final UserUtils userUtils;
+    private final CartRepository cartRepo;
 
     public UserDto createUser(User user) throws RuntimeException{
+        Cart userCart = new Cart();
         if(userRepo.existsByEmail(user.getEmail())){
             throw new UserAlreadyExistsException("L'utente " +user.getEmail() + " è già presente");
         }
+
+        cartRepo.save(userCart);
         userRepo.save(user);
         return new UserDto(user.getId(),user.getFirstName(),user.getEmail());
     }
