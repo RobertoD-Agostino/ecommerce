@@ -17,4 +17,14 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleUserDoesNotExists(UserDoesNotExistsException e){
         return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
     }
+
+    @ExceptionHandler(ProductDoesNotExistsException.class)
+    public ResponseEntity<String> handleProductDoesNotExists(ProductDoesNotExistsException e){
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(ProductAlreadyExistsException.class)
+    public ResponseEntity<String> handleProductAlreadyExistsException(ProductAlreadyExistsException e){
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+    }
 }

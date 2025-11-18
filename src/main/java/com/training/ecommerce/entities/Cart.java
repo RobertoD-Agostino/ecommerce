@@ -7,28 +7,25 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
-
-@AllArgsConstructor
-@NoArgsConstructor
-@Entity
 @Data
-public class User{
+@NoArgsConstructor
+@AllArgsConstructor
+@Entity
+public class Cart {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    private String firstName;
-
-    private String lastName;
-
-    private String email;
-
-    @OneToMany(mappedBy = "user")
-    private List<Order> orderList;
-
     @OneToOne
-    @JoinColumn(name = "cart_id")
-    private Cart cart;
+    @JoinColumn(name = "user_id")
+    private User user;
+
+    @OneToMany(mappedBy = "cart")
+    private List<CartItem> cartItemList;
+
+
+
+
 }

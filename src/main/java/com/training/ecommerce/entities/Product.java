@@ -1,0 +1,42 @@
+package com.training.ecommerce.entities;
+
+import com.training.ecommerce.enums.ProductCategory;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.List;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Entity
+public class Product {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false)
+    private Integer id;
+
+    private String name;
+
+    private Double price;
+
+    private String code;
+
+    private ProductCategory category;
+
+    private int stockQuantity;
+
+    @OneToMany(mappedBy = "product")
+    private List<CartItem> cartItemList;
+
+    @OneToMany(mappedBy = "orderItem")
+    private List<OrderItem> orderItemList;
+
+
+
+
+
+}

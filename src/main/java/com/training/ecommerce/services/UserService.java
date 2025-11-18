@@ -26,12 +26,12 @@ public class UserService {
         return new UserDto(user.getId(),user.getFirstName(),user.getEmail());
     }
 
-    public UserDto findUser(String email)throws RuntimeException {
+    public UserDto findUser(String email){
         User user = userUtils.findUserByEmail(email);
         return new UserDto(user.getId(), user.getFirstName(), user.getEmail());
     }
 
-    public User modifyUser(String email, User updatedData) {
+    public User modifyUser(String email, User updatedData){
         User oldUser = userUtils.findUserByEmail(email);
         BeanUtils.copyProperties(updatedData, oldUser, "id");
         return userRepo.save(oldUser);
