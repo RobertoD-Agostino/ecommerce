@@ -25,6 +25,8 @@ public class Product {
 
     private String code;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private ProductCategory category;
 
     private int stockQuantity;
@@ -32,7 +34,7 @@ public class Product {
     @OneToMany(mappedBy = "product")
     private List<CartItem> cartItemList;
 
-    @OneToMany(mappedBy = "orderItem")
+    @OneToMany(mappedBy = "product")
     private List<OrderItem> orderItemList;
 
 

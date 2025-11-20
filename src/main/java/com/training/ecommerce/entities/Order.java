@@ -13,6 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@Table(name = "user_order")
 public class Order {
 
     @Id
@@ -22,6 +23,7 @@ public class Order {
 
     private LocalDateTime orderDate;
 
+    @Enumerated(EnumType.STRING)
     private OrderStatus orderStatus;
 
     private Double totalAmount;
@@ -30,7 +32,7 @@ public class Order {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @OneToMany(mappedBy = "product")
+    @OneToMany(mappedBy = "order")
     private List<OrderItem> orderItemList;
 
     @OneToOne
