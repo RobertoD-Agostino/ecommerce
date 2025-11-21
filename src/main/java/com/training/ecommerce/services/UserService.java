@@ -3,14 +3,13 @@ package com.training.ecommerce.services;
 import com.training.ecommerce.dtos.UserDto;
 import com.training.ecommerce.entities.Cart;
 import com.training.ecommerce.entities.User;
-import com.training.ecommerce.exceptions.UserAlreadyExistsException;
-import com.training.ecommerce.exceptions.UserDoesNotExistsException;
+import com.training.ecommerce.exceptions.UserException;
 import com.training.ecommerce.repositories.CartRepository;
 import com.training.ecommerce.repositories.UserRepository;
 import com.training.ecommerce.utils.UserUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -24,10 +23,11 @@ public class UserService {
     public UserDto createUser(User user) throws RuntimeException{
         Cart userCart = new Cart();
         if(userRepo.existsByEmail(user.getEmail())){
-            throw new UserAlreadyExistsException("L'utente " +user.getEmail() + " è già presente");
+            throw new UserException("L'utente " +user.getEmail() + " è già presente", HttpStatus.CONFLICT);
         }
 
         cartRepo.save(userCart);
+        user.setCart(userCart);
         userRepo.save(user);
         return new UserDto(user.getId(),user.getFirstName(),user.getEmail());
     }

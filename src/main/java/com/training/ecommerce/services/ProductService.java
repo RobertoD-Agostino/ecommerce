@@ -1,11 +1,12 @@
 package com.training.ecommerce.services;
 
 import com.training.ecommerce.entities.Product;
-import com.training.ecommerce.exceptions.ProductAlreadyExistsException;
+import com.training.ecommerce.exceptions.ProductException;
 import com.training.ecommerce.repositories.ProductRepository;
 import com.training.ecommerce.utils.ProductUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -17,7 +18,7 @@ public class ProductService {
 
     public Product addProduct(Product product)throws RuntimeException{
         if(productRepo.existsByCode(product.getCode())){
-            throw new ProductAlreadyExistsException("Il prodotto " + product.getName() + " è già esistente");
+            throw new ProductException("Il prodotto " + product.getName() + " è già esistente", HttpStatus.CONFLICT);
         }
         return productRepo.save(product);
     }

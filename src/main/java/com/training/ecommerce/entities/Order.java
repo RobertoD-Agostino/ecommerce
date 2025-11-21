@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -30,13 +31,16 @@ public class Order {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
+    @ToString.Exclude
     private User user;
 
     @OneToMany(mappedBy = "order")
+    @ToString.Exclude
     private List<OrderItem> orderItemList;
 
     @OneToOne
     @JoinColumn(name = "payment_id")
+    @ToString.Exclude
     private Payment payment;
 
 

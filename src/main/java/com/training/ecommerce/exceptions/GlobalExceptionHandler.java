@@ -1,5 +1,6 @@
 package com.training.ecommerce.exceptions;
 
+import org.springframework.boot.autoconfigure.graphql.GraphQlProperties;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -8,23 +9,18 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(UserAlreadyExistsException.class)
-    public ResponseEntity<String> handleUserAlreadyExists(UserAlreadyExistsException e){
-        return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+    @ExceptionHandler(UserException.class)
+    public ResponseEntity<String> handleUserAlreadyExists(UserException e){
+        return ResponseEntity.status(e.getStatus()).body(e.getMessage());
     }
 
-    @ExceptionHandler(UserDoesNotExistsException.class)
-    public ResponseEntity<String> handleUserDoesNotExists(UserDoesNotExistsException e){
-        return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+    @ExceptionHandler(ProductException.class)
+    public ResponseEntity<String> handleProduct(ProductException e){
+        return ResponseEntity.status(e.getStatus()).body(e.getMessage());
     }
 
-    @ExceptionHandler(ProductDoesNotExistsException.class)
-    public ResponseEntity<String> handleProductDoesNotExists(ProductDoesNotExistsException e){
-        return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
-    }
-
-    @ExceptionHandler(ProductAlreadyExistsException.class)
-    public ResponseEntity<String> handleProductAlreadyExistsException(ProductAlreadyExistsException e){
-        return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+    @ExceptionHandler(CartException.class)
+    public ResponseEntity<String> handleCartException(CartException e){
+        return ResponseEntity.status(e.getStatus()).body(e.getMessage());
     }
 }

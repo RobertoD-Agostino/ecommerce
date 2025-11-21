@@ -1,9 +1,10 @@
 package com.training.ecommerce.utils;
 
 import com.training.ecommerce.entities.Product;
-import com.training.ecommerce.exceptions.ProductDoesNotExistsException;
+import com.training.ecommerce.exceptions.ProductException;
 import com.training.ecommerce.repositories.ProductRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -14,6 +15,6 @@ public class ProductUtils {
 
     public Product findProductByCode(String code)throws RuntimeException{
         return productRepo.findByCode(code)
-                .orElseThrow(() -> new ProductDoesNotExistsException("Prodotto con codice " + code + " non trovato"));
+                .orElseThrow(() -> new ProductException("Prodotto con codice " + code + " non trovato", HttpStatus.NOT_FOUND));
     }
 }

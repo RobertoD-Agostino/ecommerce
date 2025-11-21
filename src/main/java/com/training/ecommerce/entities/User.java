@@ -1,9 +1,11 @@
 package com.training.ecommerce.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.util.List;
 
@@ -26,12 +28,16 @@ public class User{
     private String email;
 
     @OneToMany(mappedBy = "user")
+    @ToString.Exclude
+    @JsonIgnore
     private List<Order> orderList;
 
     @OneToOne
     @JoinColumn(name = "cart_id")
+    @ToString.Exclude
     private Cart cart;
 
     @OneToMany(mappedBy = "user")
+    @ToString.Exclude
     private List<PurchasedItem> purchasedItemList;
 }

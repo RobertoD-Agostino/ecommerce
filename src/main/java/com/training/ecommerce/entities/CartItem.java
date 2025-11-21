@@ -1,9 +1,11 @@
 package com.training.ecommerce.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Data
 @NoArgsConstructor
@@ -20,11 +22,20 @@ public class CartItem {
 
     @ManyToOne
     @JoinColumn(name = "cart_id")
+    @ToString.Exclude
+    @JsonIgnore
     private Cart cart;
 
     @ManyToOne
     @JoinColumn(name = "product_id")
+    @ToString.Exclude
     private Product product;
+
+    public CartItem(int quantity, Cart cart, Product product) {
+        this.quantity = quantity;
+        this.cart = cart;
+        this.product = product;
+    }
 
 
 }

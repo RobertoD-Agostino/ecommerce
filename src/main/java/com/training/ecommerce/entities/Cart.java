@@ -1,9 +1,11 @@
 package com.training.ecommerce.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.util.List;
 
@@ -18,10 +20,13 @@ public class Cart {
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    @OneToOne(mappedBy  = "cart")
+    @OneToOne(mappedBy = "cart")
+    @ToString.Exclude
+    @JsonIgnore
     private User user;
 
     @OneToMany(mappedBy = "cart")
+    @ToString.Exclude
     private List<CartItem> cartItemList;
 
 
