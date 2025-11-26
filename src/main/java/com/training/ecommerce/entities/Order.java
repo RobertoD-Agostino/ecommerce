@@ -43,5 +43,11 @@ public class Order {
     @ToString.Exclude
     private Payment payment;
 
-
+    public Order(LocalDateTime orderDate, OrderStatus orderStatus, Double totalAmount, User user, List<OrderItem> orderItemList) {
+        this.orderDate = orderDate;
+        this.orderStatus = orderStatus;
+        this.totalAmount = totalAmount;
+        this.user = user;
+        this.orderItemList = orderItemList;
+    }
 }

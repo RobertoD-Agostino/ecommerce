@@ -40,6 +40,7 @@ public class Product {
 
     @OneToMany(mappedBy = "product")
     @ToString.Exclude
+    @JsonIgnore
     private List<OrderItem> orderItemList;
 
 

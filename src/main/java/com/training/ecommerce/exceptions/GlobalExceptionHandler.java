@@ -23,4 +23,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleCartException(CartException e){
         return ResponseEntity.status(e.getStatus()).body(e.getMessage());
     }
+
+    @ExceptionHandler(OrderException.class)
+    public ResponseEntity<String> handleCartException(OrderException e){
+        return ResponseEntity.status(e.getStatus()).body(e.getMessage());
+    }
 }

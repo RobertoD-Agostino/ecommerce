@@ -1,5 +1,6 @@
 package com.training.ecommerce.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.training.ecommerce.enums.PaymentMethod;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -23,6 +24,7 @@ public class Payment {
     private Double amount;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "payment_method", length = 20)
     private PaymentMethod paymentMethod;
 
     private LocalDateTime paymentDate;
@@ -30,5 +32,13 @@ public class Payment {
     @OneToOne
     @JoinColumn(name = "order_id")
     @ToString.Exclude
+    @JsonIgnore
     private Order order;
+
+    public Payment(Double amount, PaymentMethod paymentMethod, LocalDateTime paymentDate, Order order) {
+        this.amount = amount;
+        this.paymentMethod = paymentMethod;
+        this.paymentDate = paymentDate;
+        this.order = order;
+    }
 }

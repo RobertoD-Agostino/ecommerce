@@ -33,6 +33,10 @@ public class OrderItem {
     @JsonIgnore
     private Order order;
 
-
-
+    public OrderItem(int quantity, Double price, Product product, Order order) {
+        this.quantity = quantity;
+        this.price = price;
+        this.product = product;
+        this.order = order;
+    }
 }

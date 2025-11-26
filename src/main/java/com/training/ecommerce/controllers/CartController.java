@@ -2,25 +2,24 @@ package com.training.ecommerce.controllers;
 
 import com.training.ecommerce.dtos.CartItemDto;
 import com.training.ecommerce.entities.CartItem;
-import com.training.ecommerce.services.ApplicationService;
+import com.training.ecommerce.services.CartService;
 import com.training.ecommerce.utils.CartItemUtils;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.autoconfigure.graphql.GraphQlProperties;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/application")
+@RequestMapping("/cart")
 @RequiredArgsConstructor
-public class ApplicationController {
+public class CartController {
 
-    private final ApplicationService applicationService;
+    private final CartService cartService;
     private final CartItemUtils cartItemUtils;
 
     @PostMapping("/addProductToCart")
     public ResponseEntity addProductToCart(@RequestParam String code,@RequestParam int quantity,@RequestParam String email){
-        CartItem ret = applicationService.addProductToCart(code,quantity,email);
+        CartItem ret = cartService.addProductToCart(code,quantity,email);
         return new ResponseEntity(ret,HttpStatus.OK);
     }
 
@@ -30,15 +29,15 @@ public class ApplicationController {
         return new ResponseEntity(cartItem, HttpStatus.FOUND);
     }
 
-    @PutMapping("/reduceCartItemQuantity")
-    public ResponseEntity reduceCartItemQuantity(@RequestParam String code,@RequestParam int quantity,@RequestParam String email){
-        CartItemDto ret = applicationService.reduceQuantityProductFromCart(code,quantity,email);
+    @PutMapping("/modifyCartItemQuantity")
+    public ResponseEntity modifyCartItemQuantity(@RequestParam String code,@RequestParam int quantity,@RequestParam String email){
+        CartItemDto ret = cartService.modifyQuantityProductFromCart(code,quantity,email);
         return new ResponseEntity(ret, HttpStatus.OK);
     }
 
     @DeleteMapping("/removeCartItem")
     public ResponseEntity deleteCartItem(@RequestParam String code, @RequestParam String email){
-        applicationService.deleteCartItem(code,email);
+        cartService.deleteCartItem(code,email);
         return ResponseEntity.ok("Il prodotto è stato eliminato con successo");
     }
 }

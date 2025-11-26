@@ -7,8 +7,6 @@ import com.training.ecommerce.entities.Product;
 import com.training.ecommerce.entities.User;
 import com.training.ecommerce.exceptions.CartException;
 import com.training.ecommerce.repositories.CartItemRepository;
-import com.training.ecommerce.repositories.CartRepository;
-import com.training.ecommerce.repositories.ProductRepository;
 import com.training.ecommerce.utils.CartItemUtils;
 import com.training.ecommerce.utils.ProductUtils;
 import com.training.ecommerce.utils.UserUtils;
@@ -16,12 +14,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class ApplicationService {
+public class CartService {
 
     private final CartItemRepository cartItemRepo;
     private final ProductUtils productUtils;
@@ -54,12 +51,10 @@ public class ApplicationService {
                     cartItem.setQuantity(totalQuantity);
                     return cartItemRepo.save(cartItem);
                 })
-                .orElseGet(() -> {
-                    return cartItemRepo.save(new CartItem(quantity, userCart, product));
-                });
+                .orElseGet(() -> cartItemRepo.save(new CartItem(quantity, userCart, product)));
     }
 
-    public CartItemDto reduceQuantityProductFromCart(String code, int quantity, String email){
+    public CartItemDto modifyQuantityProductFromCart(String code, int quantity, String email){
         CartItem cartItem = cartItemUtils.findCartItemByProductCodeAndUserEmail(code, email);
         int totalQuantity = cartItem.getQuantity()-quantity;
 
@@ -82,6 +77,8 @@ public class ApplicationService {
         CartItem cartItem = cartItemUtils.findCartItemByProductCodeAndUserEmail(code, email);
         cartItemRepo.delete(cartItem);
     }
+
+
 
 
 
