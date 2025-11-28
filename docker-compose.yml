@@ -7,11 +7,11 @@ services:
     restart: unless-stopped
     environment:
       MARIADB_ROOT_PASSWORD: root
-      MARIADB_DATABASE: training-ecommerce
+      MARIADB_DATABASE: training_ecommerce
       MARIADB_USER: appUser
       MARIADB_PASSWORD: appPass
     ports:
-      - "3306:3306"
+      - "3307:3306"
     volumes:
       - mariadb_data:/var/lib/mysql
 
@@ -26,7 +26,7 @@ services:
     ports:
       - "8080:8080"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mariadb://mariadb:3306/training-ecommerce
+      SPRING_DATASOURCE_URL: jdbc:mariadb://mariadb:3306/training_ecommerce
       SPRING_DATASOURCE_USERNAME: appUser
       SPRING_DATASOURCE_PASSWORD: appPass
     networks:

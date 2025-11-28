@@ -43,7 +43,8 @@ public class Product {
     @JsonIgnore
     private List<OrderItem> orderItemList;
 
-
+    @Version
+    private Integer version;
 
 
 

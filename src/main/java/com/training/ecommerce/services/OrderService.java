@@ -7,12 +7,10 @@ import com.training.ecommerce.enums.OrderStatus;
 import com.training.ecommerce.enums.PaymentMethod;
 import com.training.ecommerce.exceptions.CartException;
 import com.training.ecommerce.exceptions.OrderException;
-import com.training.ecommerce.repositories.OrderItemRepository;
-import com.training.ecommerce.repositories.OrderRepository;
-import com.training.ecommerce.repositories.PaymentRepository;
-import com.training.ecommerce.repositories.ProductRepository;
+import com.training.ecommerce.repositories.*;
 import com.training.ecommerce.utils.ProductUtils;
 import com.training.ecommerce.utils.UserUtils;
+import jakarta.persistence.OptimisticLockException;
 import lombok.RequiredArgsConstructor;
 import org.aspectj.weaver.ast.Or;
 import org.springframework.http.HttpStatus;
@@ -35,54 +33,57 @@ public class OrderService {
     private final OrderRepository orderRepo;
     private final PaymentRepository paymentRepo;
     private final OrderItemRepository orderItemRepo;
+    private final PurchasedItemRepository purchasedItemRepo;
 
-//    public Order createOrderFromCart(){
-//
-//    }
 
     @Transactional
-    public OrderDto buyNow (String email, String code, String paymentMethodName, int quantity){
-        Product product = productUtils.findProductByCode(code);
-        User user = userUtils.findUserByEmail(email);
-        Order order = createOrder(user, product, quantity);
-        PaymentMethod paymentMethod = paymentMethodIsPresent(paymentMethodName);
-        Payment payment = new Payment(order.getTotalAmount(), paymentMethod, LocalDateTime.now(), order);
-        paymentRepo.save(payment);
+    public OrderDto buyNow(String email, String code, String paymentMethodName, int quantity) {
 
-        order.setPayment(payment);
-        order.setOrderStatus(OrderStatus.PAID);
-        int updatedQuantity = product.getStockQuantity()-quantity;
-        product.setStockQuantity(updatedQuantity);
+        try {
+            User user = userUtils.findUserByEmail(email);
+            Product product = productUtils.findProductByCode(code);
 
-        productRepo.save(product);
-        orderRepo.save(order);
-        UserDto userDto = new UserDto(user.getId(), user.getFirstName(), user.getEmail());
-        return new OrderDto(order.getId(), order.getOrderDate(),order.getOrderStatus(), userDto, order.getOrderItemList(),payment);
-    }
+            // Validazione quantità
+            if (quantity <= 0 || quantity > product.getStockQuantity()) {
+                throw new OrderException("Quantità non valida", HttpStatus.BAD_REQUEST);
+            }
 
-    public Order createOrder(User user, Product product, int quantity){
-        if(quantity>0 && quantity<=product.getStockQuantity()){
-            double totalOrderPrice = product.getPrice() * quantity;
-            List<OrderItem> orderItemList = new ArrayList<>();
+            // Recupero metodo pagamento
+            PaymentMethod paymentMethod = paymentMethodIsPresent(paymentMethodName);
 
-            Order order = new Order(LocalDateTime.now(), OrderStatus.PENDING ,totalOrderPrice, user, orderItemList);
-            OrderItem orderItem = new OrderItem(quantity, totalOrderPrice, product, order);
-            orderItemRepo.save(orderItem);
+            // Calcolo prezzo totale
+            double totalPrice = product.getPrice() * quantity;
 
+            // Creazione ordine + item (solo in memoria)
+            Order order = new Order(LocalDateTime.now(), OrderStatus.PENDING, totalPrice, user, new ArrayList<>());
+
+            OrderItem orderItem = new OrderItem(quantity, totalPrice, product, order);
             order.getOrderItemList().add(orderItem);
-            return orderRepo.save(order);
-        }else{
-            throw new OrderException("Inserire una quantità diversa", HttpStatus.BAD_REQUEST);
+
+            // Creazione pagamento
+            Payment payment = new Payment(totalPrice, paymentMethod, LocalDateTime.now(), order);
+            paymentRepo.save(payment);
+            order.setPayment(payment);
+            order.setOrderStatus(OrderStatus.PAID);
+
+
+            // Aggiornamento stock
+            product.setStockQuantity(product.getStockQuantity() - quantity);
+            PurchasedItem purchasedItem = new PurchasedItem(quantity,user, product);
+
+            // Persistenza
+            purchasedItemRepo.save(purchasedItem);
+            productRepo.save(product);
+            orderItemRepo.save(orderItem);
+            orderRepo.save(order); // salva anche OrderItem e Payment grazie al cascade se configurato
+
+            // DTO
+            UserDto userDto = new UserDto(user.getId(), user.getFirstName(), user.getEmail());
+            return new OrderDto(order.getId(), order.getOrderDate(), order.getOrderStatus(), userDto, order.getOrderItemList(), payment);
+        }catch (OptimisticLockException e) {
+            throw new OrderException("Qualcun altro sta acquistando ora lo stesso prodotto. Riprova.", HttpStatus.CONFLICT);
         }
     }
-
-//    public Payment createPayment(Order order, String paymentMethod){
-//        if(paymentMethodIsPresent(paymentMethod)){
-//            return paymentRepo.save(new Payment(order.getTotalAmount(), paymentMethod, LocalDateTime.now(), order));
-//        }else{
-//            throw new OrderException("Inserire un metodo di pagamento valido", HttpStatus.BAD_REQUEST);
-//        }
-//    }
 
     public PaymentMethod paymentMethodIsPresent(String paymentMethod){
         return Arrays.stream(PaymentMethod.values())

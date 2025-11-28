@@ -28,4 +28,10 @@ public class PurchasedItem {
     @JoinColumn(name = "product_id")
     @ToString.Exclude
     private Product product;
+
+    public PurchasedItem(int quantity, User user, Product product) {
+        this.quantity = quantity;
+        this.user = user;
+        this.product = product;
+    }
 }

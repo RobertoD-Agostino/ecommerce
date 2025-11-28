@@ -7,7 +7,7 @@ services:
     restart: unless-stopped
     environment:
       MARIADB_ROOT_PASSWORD: root
-      MARIADB_DATABASE: training-ecommerce
+      MARIADB_DATABASE: training_ecommerce
       MARIADB_USER: appUser
       MARIADB_PASSWORD: appPass
     ports:

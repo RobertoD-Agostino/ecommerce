@@ -8,4 +8,6 @@ import java.util.Optional;
 public interface ProductRepository extends JpaRepository<Product, Integer>{
     Optional<Product> findByCode(String code);
     boolean existsByCode(String code);
+    Optional<Product> findTopByCodeStartingWithOrderByCodeDesc(String prefix);
+
 }
