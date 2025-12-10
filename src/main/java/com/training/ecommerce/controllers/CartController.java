@@ -1,6 +1,7 @@
 package com.training.ecommerce.controllers;
 
 import com.training.ecommerce.dtos.CartItemDto;
+import com.training.ecommerce.entities.Cart;
 import com.training.ecommerce.entities.CartItem;
 import com.training.ecommerce.services.CartService;
 import com.training.ecommerce.utils.CartItemUtils;
@@ -19,7 +20,7 @@ public class CartController {
 
     @PostMapping("/addProductToCart")
     public ResponseEntity addProductToCart(@RequestParam String code,@RequestParam int quantity,@RequestParam String email){
-        CartItem ret = cartService.addProductToCart(code,quantity,email);
+        CartItemDto ret = cartService.addProductToCart(code,quantity,email);
         return new ResponseEntity(ret,HttpStatus.OK);
     }
 
@@ -39,5 +40,11 @@ public class CartController {
     public ResponseEntity deleteCartItem(@RequestParam String code, @RequestParam String email){
         cartService.deleteCartItem(code,email);
         return ResponseEntity.ok("Il prodotto è stato eliminato con successo");
+    }
+
+    @GetMapping("/getCart")
+    public ResponseEntity getCart(@RequestParam String email){
+        Cart ret = cartService.getCart(email);
+        return new ResponseEntity(ret, HttpStatus.OK);
     }
 }

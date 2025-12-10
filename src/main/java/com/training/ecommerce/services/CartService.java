@@ -7,6 +7,7 @@ import com.training.ecommerce.entities.Product;
 import com.training.ecommerce.entities.User;
 import com.training.ecommerce.exceptions.CartException;
 import com.training.ecommerce.repositories.CartItemRepository;
+import com.training.ecommerce.repositories.UserRepository;
 import com.training.ecommerce.utils.CartItemUtils;
 import com.training.ecommerce.utils.ProductUtils;
 import com.training.ecommerce.utils.UserUtils;
@@ -25,7 +26,7 @@ public class CartService {
     private final CartItemUtils cartItemUtils;
     private final UserUtils userUtils;
 
-    public CartItem addProductToCart(String code, int quantity, String email) {
+    public CartItemDto addProductToCart(String code, int quantity, String email) {
         Product product = productUtils.findProductByCode(code);
         User user = userUtils.findUserByEmail(email);
         Cart userCart = user.getCart();
@@ -36,23 +37,36 @@ public class CartService {
             throw new CartException("La quantità selezionata deve essere almeno di 1",HttpStatus.BAD_REQUEST);
         }
 
-        Optional<CartItem> optionalCartItem =
-                cartItemRepo.findByProduct_CodeAndCart_User_Email(code, email);
+        if(!cartItemRepo.existsByProduct_CodeAndCart_User_Email(code, email)){
+            CartItem cartItem = new CartItem();
+            cartItem.setProduct(product);
 
-        return optionalCartItem
-                .map(cartItem -> {
-                    int totalQuantity = cartItem.getQuantity() + quantity;
+//      Gestione quantity
+            int totalQuantity = cartItem.getQuantity() + quantity;
+            if (totalQuantity > product.getStockQuantity()) {
+                throw new CartException("La quantità selezionata è troppo grande",
+                        HttpStatus.BAD_REQUEST);
+            }
+            cartItem.setQuantity(totalQuantity);
 
-                    if (totalQuantity > product.getStockQuantity()) {
-                        throw new CartException("La quantità selezionata è troppo grande",
-                                HttpStatus.BAD_REQUEST);
-                    }
-
-                    cartItem.setQuantity(totalQuantity);
-                    return cartItemRepo.save(cartItem);
-                })
-                .orElseGet(() -> cartItemRepo.save(new CartItem(quantity, userCart, product)));
+            double price = cartItem.getProduct().getPrice() * cartItem.getQuantity();
+            cartItem.setPrice(price);
+            cartItem.setCart(userCart);
+            cartItemRepo.save(cartItem);
+            return new CartItemDto(cartItem);
+        }
+        CartItem cartItemToUpdate = cartItemUtils.findCartItemByProductCodeAndUserEmail(code, email);
+        int quantityToUpdate = cartItemToUpdate.getQuantity()+quantity;
+        if (quantityToUpdate > product.getStockQuantity()) {
+            throw new CartException("La quantità selezionata è troppo grande",
+                    HttpStatus.BAD_REQUEST);
+        }
+        cartItemToUpdate.setQuantity(quantityToUpdate);
+        cartItemRepo.save(cartItemToUpdate);
+        return new CartItemDto(cartItemToUpdate);
     }
+
+
 
     public CartItemDto modifyQuantityProductFromCart(String code, int quantity, String email){
         CartItem cartItem = cartItemUtils.findCartItemByProductCodeAndUserEmail(code, email);
@@ -76,6 +90,10 @@ public class CartService {
     public void deleteCartItem(String code, String email){
         CartItem cartItem = cartItemUtils.findCartItemByProductCodeAndUserEmail(code, email);
         cartItemRepo.delete(cartItem);
+    }
+
+    public Cart getCart(String email){
+        return userUtils.findUserByEmail(email).getCart();
     }
 
 
