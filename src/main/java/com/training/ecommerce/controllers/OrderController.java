@@ -1,5 +1,6 @@
 package com.training.ecommerce.controllers;
 
+import com.training.ecommerce.dtos.CartPurchaseDto;
 import com.training.ecommerce.dtos.OrderDto;
 import com.training.ecommerce.entities.Order;
 import com.training.ecommerce.enums.PaymentMethod;
@@ -19,6 +20,12 @@ public class OrderController {
     @PostMapping("/buyNow")
     public ResponseEntity<OrderDto> buyNow(@RequestParam String email, @RequestParam String code, @RequestParam String paymentMethod, @RequestParam int quantity){
         OrderDto ret = orderService.buyNow(email, code, paymentMethod, quantity);
+        return new ResponseEntity<>(ret, HttpStatus.OK);
+    }
+
+    @PostMapping("/buyFromCart")
+    public ResponseEntity<OrderDto> buyNow(@RequestParam String email, @RequestParam String paymentMethod, @RequestBody CartPurchaseDto cartPurchaseDto){
+        OrderDto ret = orderService.buyFromCart(email, paymentMethod, cartPurchaseDto);
         return new ResponseEntity<>(ret, HttpStatus.OK);
     }
 }
