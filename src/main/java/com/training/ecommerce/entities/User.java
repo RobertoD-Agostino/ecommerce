@@ -40,4 +40,10 @@ public class User{
     @OneToMany(mappedBy = "user")
     @ToString.Exclude
     private List<PurchasedItem> purchasedItemList;
+
+    public User(String firstName, String lastName, String email) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+    }
 }

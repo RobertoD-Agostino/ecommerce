@@ -6,8 +6,12 @@ import com.training.ecommerce.repositories.ProductRepository;
 import com.training.ecommerce.utils.ProductUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -42,17 +46,11 @@ public class ProductService {
     }
 
     private String incrementProductCode(String code) {
-        // Separiamo prefisso e numeri
-//        Regex (\\d.*):
-//
 //      \\d → un singolo carattere numerico (0-9)
 //      .* → qualsiasi cosa che segue quel numero, fino alla fine della stringa
-//      () → parentesi tonde per raggruppare (non serve tanto in questo caso)
-//
 //      Quindi (\\d.*) cattura tutto dalla prima cifra numerica fino alla fine.
         String prefix = code.replaceAll("(\\d.*)", "");
-//        Regex \\D+:
-//
+
 //      \\D → qualsiasi carattere non numerico
 //      + → uno o più caratteri consecutivi
 //      replaceAll("\\D+", "") → rimuove tutto ciò che non è numero, lasciando solo la parte numerica.
@@ -61,7 +59,7 @@ public class ProductService {
         int number = Integer.parseInt(numberPart) + 1;
 
         // Mantieni la stessa lunghezza della parte numerica originale
-//      %d → formato decimale (numero intero)
+//      %d → formato decimale
 //      0 → indica che eventuali spazi vuoti devono essere riempiti con zeri
 //      numberPart.length() → specifica la lunghezza totale della stringa numerica
         String newNumberPart = String.format("%0" + numberPart.length() + "d", number);
@@ -74,6 +72,12 @@ public class ProductService {
     public Product findProduct(String code){
         return productUtils.findProductByCode(code);
     }
+
+    public List<Product> findAllProducts(Pageable pageable, String searchFilter){
+            return (searchFilter==null) ? productRepo.findAll(pageable).getContent()
+                : productRepo.search(searchFilter, pageable).getContent();
+    }
+
 
     public void deleteProduct(String code){
         Product product = productUtils.findProductByCode(code);

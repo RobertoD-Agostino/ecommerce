@@ -29,7 +29,8 @@ public class Cart {
     @ToString.Exclude
     private List<CartItem> cartItemList;
 
-
-
-
+    public Cart(User user, List<CartItem> cartItemList) {
+        this.user = user;
+        this.cartItemList = cartItemList;
+    }
 }

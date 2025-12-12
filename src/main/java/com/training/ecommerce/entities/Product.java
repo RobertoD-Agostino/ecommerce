@@ -46,6 +46,11 @@ public class Product {
     @Version
     private Integer version;
 
-
-
+    public Product(String name, Double price, String code, ProductCategory category, int stockQuantity) {
+        this.name = name;
+        this.price = price;
+        this.code = code;
+        this.category = category;
+        this.stockQuantity = stockQuantity;
+    }
 }
