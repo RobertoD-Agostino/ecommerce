@@ -20,17 +20,17 @@ public class UserService {
     private final UserUtils userUtils;
     private final CartRepository cartRepo;
 
-    public UserDto createUser(User user) throws RuntimeException{
-        Cart userCart = new Cart();
-        if(userRepo.existsByEmail(user.getEmail())){
-            throw new UserException("L'utente " +user.getEmail() + " è già presente", HttpStatus.CONFLICT);
-        }
-
-        cartRepo.save(userCart);
-        user.setCart(userCart);
-        userRepo.save(user);
-        return new UserDto(user.getId(),user.getFirstName(),user.getEmail());
-    }
+//    public UserDto createUser(User user) throws RuntimeException{
+//        Cart userCart = new Cart();
+//        if(userRepo.existsByEmail(user.getEmail())){
+//            throw new UserException("L'utente " +user.getEmail() + " è già presente", HttpStatus.CONFLICT);
+//        }
+//
+//        cartRepo.save(userCart);
+//        user.setCart(userCart);
+//        userRepo.save(user);
+//        return new UserDto(user.getId(),user.getFirstName(),user.getEmail());
+//    }
 
     public UserDto findUser(String email){
         User user = userUtils.findUserByEmail(email);

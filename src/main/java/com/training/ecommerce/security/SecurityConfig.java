@@ -8,9 +8,11 @@ import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import com.training.ecommerce.config.RsaKeyProperties;
 import com.training.ecommerce.repositories.UserRepository;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -55,14 +57,43 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
-                .csrf(AbstractHttpConfigurer::disable) // Disabilitato perché usiamo JWT
+                .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/auth/**").permitAll() // Endpoint per login/registrazione aperti
-                        .requestMatchers("/api/v1/products/**").permitAll() // I prodotti sono visibili a tutti
-                        .anyRequest().authenticated() // Tutto il resto richiede login
+                        // 1. PUBBLICI: Chiunque può accedere
+                        .requestMatchers("/api/v1/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/products/**").permitAll()
+
+                        // 2. SOLO ADMIN: Solo chi ha il ruolo ADMIN nel token
+                        // Esempio: Creare, modificare o eliminare prodotti
+                        .requestMatchers(HttpMethod.GET, "/users/**").hasAuthority("SCOPE_ROLE_ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/products/**").hasAuthority("SCOPE_ROLE_ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/products/**").hasAuthority("SCOPE_ROLE_ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/products/**").hasAuthority("SCOPE_ROLE_ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/users/**").hasAuthority("SCOPE_ROLE_ADMIN")
+
+                        // Esempio: Gestione ordini globale
+//                        .requestMatchers("/api/v1/admin/**").hasAuthority("SCOPE_ROLE_ADMIN")
+
+                        // 3. AUTENTICATI: Qualsiasi utente loggato (User o Admin)
+                        .anyRequest().authenticated()
                 )
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Niente sessioni su server
-                .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults())) // Abilita il supporto JWT
+
+                .exceptionHandling(exceptions -> exceptions
+                        // Caso 1: Token mancante o non valido (Il tuo caso attuale)
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.setContentType("application/json");
+                            response.getWriter().write("{ \"errore\": \"NON_AUTENTICATO\", \"messaggio\": \"Token mancante o scaduto. Effettua il login per continuare.\" }");
+                        })
+                        // Caso 2: Token presente ma sei un User semplice (Il caso di prima)
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                            response.setContentType("application/json");
+                            response.getWriter().write("{ \"errore\": \"ACCESSO_NEGATO\", \"messaggio\": \"Permessi insufficienti. Solo l'admin può eliminare prodotti.\" }");
+                        })
+                )
+                .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
                 .build();
     }
 

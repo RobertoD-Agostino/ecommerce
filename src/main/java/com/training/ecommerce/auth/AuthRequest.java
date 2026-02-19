@@ -1,3 +1,3 @@
 package com.training.ecommerce.auth;
 
-public record AuthRequest(String email, String password) {}
+public record AuthRequest(String firstName, String lastName, String email, String password) {}

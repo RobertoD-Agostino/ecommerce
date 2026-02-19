@@ -17,11 +17,11 @@ public class UserController {
     private final UserService userService;
     private final UserRepository userRepository;
 
-    @PostMapping("/createUser")
-    public ResponseEntity<UserDto> createUser(@RequestBody User user){
-        UserDto ret = userService.createUser(user);
-        return new ResponseEntity<>(ret, HttpStatus.CREATED);
-    }
+//    @PostMapping("/createUser")
+//    public ResponseEntity<UserDto> createUser(@RequestBody User user){
+//        UserDto ret = userService.createUser(user);
+//        return new ResponseEntity<>(ret, HttpStatus.CREATED);
+//    }
 
     @GetMapping("/findUser")
     public ResponseEntity<UserDto> findUser(@RequestParam String email){

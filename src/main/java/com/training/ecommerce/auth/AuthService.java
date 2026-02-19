@@ -1,7 +1,9 @@
 package com.training.ecommerce.auth;
 
 
+import com.training.ecommerce.entities.Role;
 import com.training.ecommerce.entities.User;
+import com.training.ecommerce.repositories.RoleRepository;
 import com.training.ecommerce.repositories.UserRepository;
 import com.training.ecommerce.security.TokenService;
 import lombok.RequiredArgsConstructor;
@@ -12,12 +14,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class AuthService {
 
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final TokenService tokenService;
     private final AuthenticationManager authenticationManager;
@@ -33,18 +37,28 @@ public class AuthService {
     }
 
     public String register(AuthRequest request) {
-        // Creiamo l'utente usando i tuoi campi
         User user = new User();
+        user.setFirstName(request.firstName());
+        user.setLastName(request.lastName());
         user.setEmail(request.email());
         user.setPassword(passwordEncoder.encode(request.password()));
 
-        // Inizializziamo le liste per evitare errori nel DB
-        user.setRoles(new ArrayList<>());
-        user.setOrderList(new ArrayList<>());
-        user.setPurchasedItemList(new ArrayList<>());
+        List<Role> roles = new ArrayList<>();
 
+        // LOGICA DI SCELTA:
+        if (request.email().endsWith("@admin.com")) {
+            Role adminRole = roleRepository.findByName("ROLE_ADMIN")
+                    .orElseThrow(() -> new RuntimeException("Ruolo non trovato"));
+            roles.add(adminRole);
+        } else {
+            Role userRole = roleRepository.findByName("ROLE_USER")
+                    .orElseThrow(() -> new RuntimeException("Ruolo non trovato"));
+            roles.add(userRole);
+        }
+
+        user.setRoles(roles);
         userRepository.save(user);
-        return "Utente registrato con successo! Ora puoi fare il login.";
+        return "Registrato!";
     }
 
     public String login(AuthRequest request) {
