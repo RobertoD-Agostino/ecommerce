@@ -5,9 +5,12 @@ import com.training.ecommerce.entities.Cart;
 import com.training.ecommerce.entities.CartItem;
 import com.training.ecommerce.services.CartService;
 import com.training.ecommerce.utils.CartItemUtils;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -19,31 +22,36 @@ public class CartController {
     private final CartItemUtils cartItemUtils;
 
     @PostMapping("/addProductToCart")
-    public ResponseEntity addProductToCart(@RequestParam String code,@RequestParam int quantity,@RequestParam String email){
+    public ResponseEntity addProductToCart(@RequestParam String code,@RequestParam int quantity,@AuthenticationPrincipal Jwt jwt){
+        String email = jwt.getSubject();
         CartItemDto ret = cartService.addProductToCart(code,quantity,email);
         return new ResponseEntity(ret,HttpStatus.OK);
     }
 
     @GetMapping("/findCartItem")
-    public ResponseEntity<CartItem> findCartItemByProductCode(@RequestParam String code,@RequestParam String email){
+    public ResponseEntity<CartItem> findCartItemByProductCode(@RequestParam String code,@AuthenticationPrincipal Jwt jwt){
+        String email = jwt.getSubject();
         CartItem cartItem = cartItemUtils.findCartItemByProductCodeAndUserEmail(code,email);
         return new ResponseEntity(cartItem, HttpStatus.FOUND);
     }
 
     @PutMapping("/modifyCartItemQuantity")
-    public ResponseEntity modifyCartItemQuantity(@RequestParam String code,@RequestParam int quantity,@RequestParam String email){
+    public ResponseEntity modifyCartItemQuantity(@RequestParam String code,@RequestParam int quantity,@AuthenticationPrincipal Jwt jwt){
+        String email = jwt.getSubject();
         CartItemDto ret = cartService.modifyQuantityProductFromCart(code,quantity,email);
         return new ResponseEntity(ret, HttpStatus.OK);
     }
 
     @DeleteMapping("/removeCartItem")
-    public ResponseEntity deleteCartItem(@RequestParam String code, @RequestParam String email){
+    public ResponseEntity deleteCartItem(@RequestParam String code, @AuthenticationPrincipal Jwt jwt){
+        String email = jwt.getSubject();
         cartService.deleteCartItem(code,email);
         return ResponseEntity.ok("Il prodotto è stato eliminato con successo");
     }
 
     @GetMapping("/getCart")
-    public ResponseEntity getCart(@RequestParam String email){
+    public ResponseEntity getCart(@AuthenticationPrincipal Jwt jwt){
+        String email = jwt.getSubject();
         Cart ret = cartService.getCart(email);
         return new ResponseEntity(ret, HttpStatus.OK);
     }

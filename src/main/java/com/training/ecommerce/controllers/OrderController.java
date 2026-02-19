@@ -8,6 +8,8 @@ import com.training.ecommerce.services.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -18,13 +20,15 @@ public class OrderController {
     private final OrderService orderService;
 
     @PostMapping("/buyNow")
-    public ResponseEntity<OrderDto> buyNow(@RequestParam String email, @RequestParam String code, @RequestParam String paymentMethod, @RequestParam int quantity){
+    public ResponseEntity<OrderDto> buyNow(@AuthenticationPrincipal Jwt jwt, @RequestParam String code, @RequestParam String paymentMethod, @RequestParam int quantity){
+        String email = jwt.getSubject();
         OrderDto ret = orderService.buyNow(email, code, paymentMethod, quantity);
         return new ResponseEntity<>(ret, HttpStatus.OK);
     }
 
     @PostMapping("/buyFromCart")
-    public ResponseEntity<OrderDto> buyNow(@RequestParam String email, @RequestParam String paymentMethod, @RequestBody CartPurchaseDto cartPurchaseDto){
+    public ResponseEntity<OrderDto> buyNow(@AuthenticationPrincipal Jwt jwt, @RequestParam String paymentMethod, @RequestBody CartPurchaseDto cartPurchaseDto){
+        String email = jwt.getSubject();
         OrderDto ret = orderService.buyFromCart(email, paymentMethod, cartPurchaseDto);
         return new ResponseEntity<>(ret, HttpStatus.OK);
     }
