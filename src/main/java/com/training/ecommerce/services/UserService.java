@@ -18,7 +18,6 @@ public class UserService {
 
     private final UserRepository userRepo;
     private final UserUtils userUtils;
-    private final CartRepository cartRepo;
 
 //    public UserDto createUser(User user) throws RuntimeException{
 //        Cart userCart = new Cart();

@@ -9,6 +9,7 @@ import com.training.ecommerce.exceptions.OrderException;
 import com.training.ecommerce.repositories.*;
 import com.training.ecommerce.utils.ProductUtils;
 import com.training.ecommerce.utils.UserUtils;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.OptimisticLockException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.graphql.GraphQlProperties;
@@ -21,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -34,7 +36,73 @@ public class OrderService {
     private final OrderItemRepository orderItemRepo;
     private final PurchasedItemRepository purchasedItemRepo;
     private final CartItemRepository cartItemRepository;
-    private final CartRepository cartRepository;
+    private final CartService cartService;
+
+
+    public Order createOrderFromCart(String email) {
+        User user = userUtils.findUserByEmail(email);
+        Cart cart = user.getCart();
+
+        if (cart.getCartItemList().isEmpty()) {
+            throw new CartException("Il carrello è vuoto", HttpStatus.BAD_REQUEST);
+        }
+
+        // 1. Creiamo l'oggetto Order
+        Order order = new Order();
+        order.setUser(user);
+        order.setOrderDate(LocalDateTime.now());
+        order.setOrderStatus(OrderStatus.PENDING);
+
+        // 2. Trasformiamo i CartItem in OrderItem (per salvare il prezzo storico)
+        List<OrderItem> orderItems = cart.getCartItemList().stream().map(cartItem -> {
+            OrderItem item = new OrderItem();
+            item.setProduct(cartItem.getProduct());
+            item.setQuantity(cartItem.getQuantity());
+            item.setPrice(cartItem.getProduct().getPrice()); // Prezzo attuale
+            item.setOrder(order);
+            return item;
+        }).collect(Collectors.toList());
+
+        order.setOrderItemList(orderItems);
+
+        // 3. Calcoliamo il totale dell'ordine
+        double total = orderItems.stream()
+                .mapToDouble(item -> item.getPrice() * item.getQuantity())
+                .sum();
+        order.setTotalAmount(total);
+
+        // 4. Salviamo l'ordine (Cascade farà il resto per gli OrderItem)
+        return orderRepo.save(order);
+    }
+
+    @Transactional
+    public void confirmPaymentAndCompleteOrder(Integer orderId) {
+        Order order = orderRepo.findById(orderId)
+                .orElseThrow(() -> new EntityNotFoundException("Ordine non trovato"));
+
+        if (order.getOrderStatus() != OrderStatus.PENDING) {
+            return; // Evitiamo di processare due volte lo stesso ordine
+        }
+
+        // 1. Aggiorniamo lo stato dell'ordine
+        order.setOrderStatus(OrderStatus.PAID); // o CONFIRMED/SHIPPED secondo il tuo Enum
+
+        // 2. Scarichiamo il magazzino (Stock)
+        for (OrderItem item : order.getOrderItemList()) {
+            Product product = item.getProduct();
+            int newStock = product.getStockQuantity() - item.getQuantity();
+            if (newStock < 0) {
+                throw new RuntimeException("Stock insufficiente per il prodotto: " + product.getName());
+            }
+            product.setStockQuantity(newStock);
+            productRepo.save(product);
+        }
+
+        // 3. Svuotiamo il carrello dell'utente
+        cartService.clearCart(order.getUser().getEmail());
+
+        orderRepo.save(order);
+    }
 
 
     @Transactional

@@ -66,7 +66,10 @@ public class CartService {
         return new CartItemDto(cartItemToUpdate);
     }
 
-
+    public void clearCart(String email){
+        Cart userCart = userUtils.findUserByEmail(email).getCart();
+        cartItemRepo.deleteAllByCart_Id(userCart.getId());
+    }
 
     public CartItemDto modifyQuantityProductFromCart(String code, int quantity, String email){
         CartItem cartItem = cartItemUtils.findCartItemByProductCodeAndUserEmail(code, email);

@@ -34,17 +34,6 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(e.getStatus()).body(e.getMessage());
     }
 
-//    @ExceptionHandler(AccessDeniedException.class)
-//    public ResponseEntity<Map<String, Object>> handleAccessDenied(AccessDeniedException ex) {
-//        Map<String, Object> body = new HashMap<>();
-//        body.put("timestamp", LocalDateTime.now());
-//        body.put("status", HttpStatus.FORBIDDEN.value());
-//        body.put("errore", "Accesso Negato");
-//        body.put("messaggio", "Non hai i permessi ADMIN per eseguire questa azione!");
-//
-//        return new ResponseEntity<>(body, HttpStatus.FORBIDDEN);
-//    }
-
     @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
     public ResponseEntity<String> handleAccessDeniedException(AccessDeniedException ex) {
         return ResponseEntity
